@@ -1,0 +1,173 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using BlazorApp1.Client.Services
+@inject IGlobalStateVars GlobalVars
+@implements IDisposable
+
+<h3>ProduktComponent</h3>
+
+<EditForm Model=@User OnSubmit=@FormSubmitted FormName="Register">
+    <DataAnnotationsValidator />
+
+    <div>
+        <label for="namn">Namn:</label>
+        <InputText @bind-Value="User.Namn" id="namn"></InputText>
+    </div>
+
+    <div>
+        <label for="pris">Pris:</label>
+        <InputNumber @bind-Value="User.Pris" id="pris"></InputNumber>
+    </div>
+
+    <div>
+        <label for="vikt">Vikt:</label>
+        <InputNumber @bind-Value="User.Vikt" id="vikt"></InputNumber>
+    </div>
+
+    <div>
+        <label for="material">Material:</label>
+        <InputText @bind-Value="User.Material" id="material"></InputText>
+    </div>
+
+
+
+@* 
+    <div>
+        <label for="email">E-post</label>
+        <InputText @bind-Value="User.Email" id="email" />
+        <ValidationMessage For="@(() => User.Email)" />
+    </div>
+    <div>
+        <label for="age">Age:</label>
+        <InputNumber @bind-Value="User.Age" id="age"></InputNumber>
+        <ValidationMessage For="@(() => User.Age)" />
+    </div>
+    <div>
+        <label for="password">Password</label>
+        <InputText @bind-Value="User.Password" id="password" type="password"></InputText>
+    </div>
+    <div>
+        <label for="confirmPassword">Confirm Password</label>
+        <InputText @bind-Value="User.ConfirmPassword" id="confirmPassword" type="password"></InputText>
+    </div>
+ *@
+    <button type="submit">Skicka</button>
+
+    <ValidationSummary></ValidationSummary>
+
+</EditForm>
+<hr/>
+
+<ul>
+    @foreach (var item in MyProduktlist)
+    {
+      <li>@item.Namn</li>  
+    }
+</ul>
+
+@code {
+
+
+    private void FormSubmitted(EditContext editContext)
+    {
+        bool formIsValidated = editContext.Validate();
+        if (formIsValidated)
+        {
+            var newUser = (Usermodel)editContext.Model;
+
+            Usermodel tmp = new();
+            tmp.Namn = newUser.Namn;
+            tmp.Vikt = newUser.Vikt;
+            tmp.Pris = newUser.Pris;
+            tmp.Material = newUser.Material;
+
+            // Post to api
+            //MyProduktlist.Add(tmp);
+            GlobalVars.AddProdukt(tmp);
+            newUser.Namn = null;
+        }
+    }
+
+
+
+    List<Usermodel> MyProduktlist => GlobalVars.MyProduktlist;
+
+    protected override void OnInitialized()
+    {
+        GlobalVars.OnChange += StateHasChanged;
+        Console.WriteLine("Global List har initierats");
+    }
+
+    public void Dispose()
+    {
+        GlobalVars.OnChange -= StateHasChanged;
+        Console.WriteLine("Global List Disposed");
+
+    }
+
+
+    private Usermodel User = new();
+    public class Usermodel : IValidatableObject
+    {
+
+
+        [Required(ErrorMessage = "Namn är obligatoriskt")]
+        [MinLength(5, ErrorMessage = "Namn måste vara minst 5 tecken.")]
+        public string Namn { get; set; }
+
+        [Required(ErrorMessage = "Pris är obligatoriskt")]
+        [Range(0, double.MaxValue, ErrorMessage = "Vikt är felaktig")]
+        public double Pris { get; set; }
+
+        [Required(ErrorMessage = "Material är obligatoriskt")]
+        public string Material { get; set; }
+
+        [Required(ErrorMessage = "Vikt är obligatoriskt")]
+        [Range(0, 100, ErrorMessage = "Vikt är felaktig")]
+        public double Vikt { get; set; }
+
+/*
+        [EmailAddress(ErrorMessage = "Epostadressen är ogiltig")]
+        public string Email { get; set; }
+
+        [Range(15, 99, ErrorMessage = "Åldern är felaktig")]
+        public int Age { get; set; }
+
+        [Required(ErrorMessage = "Vänligen ange ett lösenord")]
+        [MinLength(3, ErrorMessage = "Lösenordet måste vara minst 3 tecken.")]
+        public string Password { get; set; }
+
+        [Compare("Password", ErrorMessage = "Lösenorden matchar inte")]
+        public string ConfirmPassword { get; set; }
+
+*/
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (Pris == 0.00 )
+            {
+                yield return new ValidationResult("Pris får inte vara 0.00", new[] { nameof(Pris) });
+            }
+            if (Vikt == 0.00)
+            {
+                yield return new ValidationResult("Vikt får inte vara 0.00", new[] { nameof(Vikt) });
+            }
+
+            if (Material?.Equals("Plast") == true )
+            {
+                yield return new ValidationResult("Materialet Plast är inte tillåtet", new[] { nameof(Material) });
+            }
+
+            // if (Email?.EndsWith(".dk") == true)
+            // {
+            //     yield return new ValidationResult("Epost från Danmark är inte tillåtet", new[] { nameof(Email) });
+            // }
+            // if (Namn.Any(char.IsDigit))
+            // {
+            //     yield return new ValidationResult("Inga siffror i namnet är okej", new[] { nameof(Namn) });
+            // }
+
+        }
+    }
+
+
+}

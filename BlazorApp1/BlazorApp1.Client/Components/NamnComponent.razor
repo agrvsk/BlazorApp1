@@ -1,0 +1,52 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using BlazorApp1.Client.Services
+@inject IGlobalStateVars GlobalVars
+@implements IDisposable
+
+@* Model=@User
+ *@
+
+
+<form  @onsubmit="FormSubmitted" method="post" @formname="starship-form">
+
+
+    <div border="1">
+        <label for="namn">Namn:</label>
+        <InputText @bind-Value="namnet" id="namn"></InputText>
+    </div>
+
+    <button type="submit">Skicka</button>
+
+
+</form>
+
+@code {
+
+//    public string glonet => GlobalVars.MittNamn;
+    public string namnet = "";
+
+
+    private void FormSubmitted()
+    {
+ //       bool formIsValidated = editContext.Validate();
+ //       if (formIsValidated)
+        {
+//            var newUser = (string)editContext.Model;
+            GlobalVars.AngeNamn(namnet);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        GlobalVars.OnChange += StateHasChanged;
+        Console.WriteLine("Namn har initierats");
+    }
+
+    public void Dispose()
+    {
+        GlobalVars.OnChange -= StateHasChanged;
+        Console.WriteLine("Name Disposed");
+
+    }
+
+}

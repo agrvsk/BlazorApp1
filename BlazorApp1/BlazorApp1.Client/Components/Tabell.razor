@@ -1,0 +1,66 @@
+﻿@using System.Text
+<hr /> 
+
+@* @for (var i= 1 ; i <= 10 ; i++ )
+{
+	var li = i;
+	<p><a href="javascript:void(0)" @onclick="()=>VisaDen(li)">Visa @i:ans tabell</a></p>
+}
+*@
+
+<form @onsubmit="Submit" method="post" @formname="multiplicera">
+	<div>
+		<label>
+			Tabell:
+			<InputNumber @bind-Value="TabellId"></InputNumber>
+		</label>
+		<button type="submit">Visa</button>
+	</div>
+</form>
+
+
+<hr/>
+
+<div>@((MarkupString)qwerty)</div>
+
+<hr/>
+
+@code {
+	//Parameter]
+	[SupplyParameterFromForm]
+	public int TabellId { get; set; }
+
+	public string qwerty="";
+	public void Submit()
+	{
+		VisaDen(TabellId);
+	}
+	public void VisaDen(int i)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.Append("<table>");
+		@for (int j = 1; j <= 10; j++)
+		{
+			sb.Append("<tr>");
+
+			sb.Append("<td>");
+			sb.Append(i+ "x"+ j);
+			sb.Append("</td>");
+
+			sb.Append("<td>");
+			sb.Append(i * j);
+			sb.Append("</td>");
+
+			sb.Append("</tr>");
+
+		}
+		sb.Append("</table>");
+
+
+		qwerty = sb.ToString();
+
+		//qwerty = $"Visar tabell {i}";
+		//StateHasChanged();
+	}
+
+}

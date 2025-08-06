@@ -1,0 +1,31 @@
+﻿@using BlazorApp1.Client.Services
+@inject IGlobalStateVars GlobalVars
+
+
+<PageTitle>@Title</PageTitle>
+<h3 style="color:@Color">@Title</h3>
+<h3 style="color:@Color">@Namnet</h3>
+
+
+@code 
+{
+	//[Parameter]
+	public string Namnet => GlobalVars.MittNamn;
+	[Parameter]
+	public string Title { get; set; }
+	[Parameter]
+	public string Color { get; set; }
+
+    protected override void OnInitialized()
+    {
+        GlobalVars.OnChange += StateHasChanged;
+        Console.WriteLine("Namn har initierats");
+    }
+
+    public void Dispose()
+    {
+        GlobalVars.OnChange -= StateHasChanged;
+        Console.WriteLine("Name Disposed");
+
+    }
+}
