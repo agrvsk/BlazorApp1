@@ -1,0 +1,78 @@
+﻿@page "/todoForm"
+@using System.ComponentModel.DataAnnotations
+@using BlazorApp1.Client.Entities
+@using BlazorApp1.Client.Services
+@using Microsoft.AspNetCore.Components.Forms
+
+@rendermode InteractiveWebAssembly
+@inject IGlobalStateVars GlobalVars
+@inject NavigationManager Navigation
+
+
+<h3>TodoForm</h3>
+
+<EditForm Model=@Editing OnSubmit=@FormSubmitted FormName="Register">
+    <DataAnnotationsValidator/>
+
+    <div>
+        <label for="id">Id:</label>
+        <InputNumber @bind-Value="Editing.Id" id="id" ></InputNumber>
+    </div>
+
+    <div>
+        <label for="title">Title:</label>
+        <InputText @bind-Value="Editing.Title" id="title" />
+        <ValidationMessage For="@(() => Editing.Title)" />
+    </div>
+    <div>
+        <label for="descr">Description:</label>
+        <InputText @bind-Value="Editing.Description" id="descr"></InputText>
+        <ValidationMessage For="@(() => Editing.Description)" />
+    </div>
+
+    <button type="submit">Skicka</button>
+    <input type="button" value="GoBack" @onclick="GoBack" />
+
+    <ValidationSummary></ValidationSummary>
+
+</EditForm>
+
+
+
+
+
+@code {
+
+    private void FormSubmitted(EditContext editContext)
+    {
+        bool formIsValidated = editContext.Validate();
+        if(formIsValidated)
+        {
+            var currentEdit = (Todo)editContext.Model;
+            var cpyTodo = (Todo) currentEdit.Clone();
+            // Post to api
+            GlobalVars.MyToDolist.Add(cpyTodo);
+
+            currentEdit.Id++;
+            currentEdit.Title = "";
+            currentEdit.Description = "";
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Editing.Id = GlobalVars.MyToDolist.Any() 
+        ? GlobalVars.MyToDolist.Max(o => o.Id) + 1
+        : 1;
+
+    }
+    public void GoBack()
+    {
+        Navigation.NavigateTo("todoList");
+        StateHasChanged();
+    }
+
+
+    public Todo Editing = new();
+
+}

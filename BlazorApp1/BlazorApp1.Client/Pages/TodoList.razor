@@ -1,0 +1,60 @@
+﻿@page "/todoList/{Id:int?}"
+@using System.ComponentModel.DataAnnotations
+@using BlazorApp1.Client.Entities
+@using BlazorApp1.Client.Services
+@rendermode InteractiveWebAssembly
+@inject IGlobalStateVars GlobalVars
+@inject NavigationManager Navigation
+
+<h3>TodoList</h3>
+@if (!loaded)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Titel</th>
+				<th>Description</th>
+				<th>Assigned</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in GlobalVars.MyToDolist)
+			{
+				<tr>
+					<td>@item.Id</td>
+					<td>@item.Title</td>
+					<td>@item.Description</td>
+					<td>@item.AssignedTo</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+
+<input type="button" value="Ny" @onclick="AddTodo" enabled=@loaded />
+
+<h1>Id är @Id</h1>
+
+@code {
+	[Parameter]
+	public int Id { get; set; }
+	public bool loaded { get; set; } = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		loaded = true;
+	}
+
+
+	public void AddTodo()
+	{
+		Navigation.NavigateTo("todoForm");
+
+	}
+}
