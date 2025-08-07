@@ -1,0 +1,28 @@
+﻿@using BlazorApp1.Server.Services
+@using BlazorApp1.Server.Services
+<h3>WaterIntakeMeter</h3>
+@inject IWaterService waterService
+
+<div style="width: 200px; background-color: lightgrey; height: 25px">
+    <div style="width: @(MeterWidth)px; background-color: black; height:25px"></div>
+</div>
+<p>@Value ml</p>
+
+
+
+@code {
+    [Parameter]
+    public decimal Value { get; set; }
+
+    [Parameter]
+    public decimal MaxValue { get; set; }
+
+    public int MeterWidth { get; set; } = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Value = waterService.GetTodaysIntake();
+        MeterWidth = (int)(Value / MaxValue * 200);
+    }
+
+}

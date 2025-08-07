@@ -1,0 +1,69 @@
+﻿@using BlazorApp1.Server.Entities
+@using BlazorApp1.Server.Services
+@inject IWaterService waterService
+@rendermode InteractiveServer
+
+
+<h3>WaterIntakeComponent</h3>
+
+<EditForm Model=@Intake onsubmit=@IntakeSubmitted FormName="Register">
+    <div>
+        <label for="name">Namn</label>
+        <InputText @bind-Value="Intake.Name" id="name"></InputText>
+    </div>
+    <div>
+        <label for="amount">Amount:</label>
+        <InputNumber @bind-Value="Intake.Amount" id="amount"></InputNumber>
+    </div>
+    <button type="submit">Spara intag</button>
+</EditForm>
+<hr />
+
+@if (_rendered)
+{
+    @foreach(var intake in Intakes)
+    {
+        <p>
+            <button @onclick="() => IntakeDelete(intake.Id)">Ta bort</button>
+            @intake.Name - @intake.Amount - @intake.Date
+        </p>
+    }
+}
+else
+{
+    <p>Laddar in drickorna...</p>
+}
+
+
+@code {
+    public Water Intake { get; set; } = new();
+    public List<Water> Intakes { get; set; } = new();
+    private bool _rendered = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Intakes = await waterService.GetIntakes();
+        _rendered = true;
+    }
+
+
+    private async Task IntakeSubmitted(EditContext editContext)
+    {
+        var enteredIntake = (Water)editContext.Model;
+        var intake = new Water()
+            {
+                Name = enteredIntake.Name,
+                Amount = enteredIntake.Amount,
+                Date = DateTime.Now
+            };
+
+        await waterService.SaveIntake(intake);
+        Intakes = await waterService.GetIntakes();
+    }
+
+    private async Task IntakeDelete(int id)
+    {
+        await waterService.DeleteIntake(id);
+        Intakes = await waterService.GetIntakes();
+    }
+}

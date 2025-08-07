@@ -1,0 +1,28 @@
+﻿@page "/companylist"
+
+@using BlazorApp1.Server.Services
+@using BlazorApp1.Server.Entities
+@inject ICompanyService companyService
+<h3>CompanyList</h3>
+
+@if(Loading)
+{
+    <p>Laddar företag...</p>
+}
+else
+{
+    if(Companies != null)
+    {
+        foreach(var company in Companies)
+        {
+            <div class="card card-body m-3">
+                @company.Name - @company.Address
+            </div>
+        }
+
+        <p>Har sidor före: @PagingData.HasPrevious</p>
+        <p>Har sidor efter: @PagingData.HasNext</p>
+        <p>Antal sidor: @PagingData.TotalPages</p>
+    }
+}
+

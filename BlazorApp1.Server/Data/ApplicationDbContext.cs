@@ -11,6 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     //}
 
     public DbSet<Todo> Todo { get; set; } = default!;
+    public DbSet<Water> Intakes { get; set; }
 
 
 

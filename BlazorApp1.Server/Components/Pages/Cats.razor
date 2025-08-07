@@ -1,0 +1,35 @@
+﻿@page "/Cats"
+@using BlazorApp1.Server.Services
+@using BlazorApp1.Server.Entities
+@inject ICatService catService
+@rendermode InteractiveServer
+
+<h3>Cats</h3>
+
+@if(Loading)
+{
+    <p>Laddar katter...</p>
+}
+else
+{
+    if(CatInfo != null)
+    {
+        foreach (var cat in CatInfo)
+        {
+            <div class="card card-body m-3">
+                <p>@cat.Length</p>
+                <p>@cat.Origin</p>
+                <img src="@cat.ImageLink" style="width: 200px;" />
+            </div>
+        }
+    }
+    else
+    {
+        <p>Välj katt!</p>
+    }
+    <br />
+    <input type="text" @bind="catName" />
+    <input type="button" @onclick="GetCats" value="Hämta katterna" />
+}
+
+

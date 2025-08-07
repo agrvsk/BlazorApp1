@@ -1,6 +1,7 @@
 using BlazorApp1.Server.Components;
 using BlazorApp1.Server.Components.Account;
 using BlazorApp1.Server.Data;
+using BlazorApp1.Server.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,23 @@ public class Program
             })
             .AddIdentityCookies();
 
+        builder.Services.AddHttpClient("CatClient", client =>
+        {
+            client.BaseAddress = new Uri("https://api.api-ninjas.com");
+            client.DefaultRequestHeaders.Add("X-Api-Key", "53jgXwKllLaKNQ1U4lLyiw==ktmA2BZNcvlzmmhe");
+        });
+
+
+        builder.Services.AddHttpClient("CompanyClient", client =>
+        {
+            client.BaseAddress = new Uri("https://localhost:7273");
+        });
+
+        builder.Services.AddScoped<ICatService, CatService>();
+        builder.Services.AddScoped<ICompanyService, CompanyService>();
+        builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+
+
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
@@ -40,6 +58,7 @@ public class Program
             .AddDefaultTokenProviders();
 
         builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+        builder.Services.AddScoped<IWaterService, WaterService>();
 
         var app = builder.Build();
 

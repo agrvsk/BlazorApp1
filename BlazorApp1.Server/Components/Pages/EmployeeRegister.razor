@@ -1,0 +1,22 @@
+﻿@page "/employees"
+@using BlazorApp1.Server.Services
+@inject IEmployeeService employeeService
+@rendermode InteractiveServer
+<h3>Employees</h3>
+
+@if (Loading)
+{
+    <p>Laddar anställda...</p>
+}
+else
+{
+    if (Employees != null)
+    {
+        foreach (var employee in Employees)
+        {
+            <div class="card card-body m-3">
+                <p>@employee.Name - @employee.Position - @employee.Age</p>
+            </div>
+        }
+    }
+}
