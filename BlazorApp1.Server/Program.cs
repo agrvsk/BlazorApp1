@@ -36,6 +36,11 @@ public class Program
             client.DefaultRequestHeaders.Add("X-Api-Key", "53jgXwKllLaKNQ1U4lLyiw==ktmA2BZNcvlzmmhe");
         });
 
+        builder.Services.AddHttpClient("RiddleClient", client =>
+        {
+            client.BaseAddress = new Uri("https://api.api-ninjas.com");
+            client.DefaultRequestHeaders.Add("X-Api-Key", "53jgXwKllLaKNQ1U4lLyiw==ktmA2BZNcvlzmmhe");
+        });
 
         builder.Services.AddHttpClient("CompanyClient", client =>
         {
@@ -43,6 +48,7 @@ public class Program
         });
 
         builder.Services.AddScoped<ICatService, CatService>();
+        builder.Services.AddScoped<IRiddleService, RiddleService>();
         builder.Services.AddScoped<ICompanyService, CompanyService>();
         builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 

@@ -1,0 +1,101 @@
+﻿@page "/Riddles"
+@using BlazorApp1.Server.Services
+@using BlazorApp1.Server.Entities
+@inject IRiddleService riddleService
+@rendermode InteractiveServer
+
+<h3>Riddles</h3>
+
+@if (Loading)
+{
+    <p>Laddar riddle...</p>
+}
+else
+{
+    if (RiddleInfo != null)
+    {
+        foreach (var riddle in RiddleInfo)
+        {
+            <div class="card card-body m-3">
+                <p>@riddle.title</p>
+                <p>@riddle.question</p>
+
+
+                @if (Waiting)
+                {
+                    <p>@remaining</p>
+                }
+                else
+                {
+                    <p>@riddle.answer</p>
+                }
+            </div>
+        }
+    }
+@* 
+    else
+    {
+        <p>Välj katt!</p>
+    } 
+    <input type="text" @bind="catName" />
+    *@
+    <br />
+    <input type="button" @onclick="GetRiddle" value="Hämta riddle" />
+
+}
+
+@code 
+{
+    private IEnumerable<Riddle> RiddleInfo { get; set; }
+    public bool Loading { get; set; } = false;
+    public bool Waiting { get; set; } = false;
+
+    PeriodicTimer? timer;
+    private int timeLeft;
+    public string remaining => TimeSpan.FromSeconds(timeLeft).ToString(@"mm\:ss");
+
+    //    protected override async Task OnInitializedAsync()
+    // {
+    // 	Console.WriteLine("OnInitializedAsync ");
+    // }
+
+
+    private async Task GetRiddle()
+    {
+        Loading = true; //Frågan
+        Waiting = true; //svaret
+        RiddleInfo = await riddleService.GetRiddles();
+        Loading = false;
+        StateHasChanged();
+
+        await Start();
+        Waiting = false;
+        Stopp();
+        StateHasChanged();
+
+    }
+
+
+    protected async Task Start()
+    {
+        timeLeft = 20;
+        timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+
+        while (timeLeft > 0 && await timer.WaitForNextTickAsync())
+        {
+            if (timeLeft > 0)
+            {
+                timeLeft -= 1;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+
+    protected void Stopp()
+    {
+        timer?.Dispose();
+    }
+
+
+
+}
