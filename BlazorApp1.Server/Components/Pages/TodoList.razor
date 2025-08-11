@@ -28,11 +28,14 @@ else
 			{
 				<tr>
 					<ErrorBoundary>
-@* 					<td>
-						<a class="btn-danger" @onclick="() => DeleteTodo(item.Id)" href="/todoList/@item.Id">Delete</a>
-					</td>
- *@					<td>
-							<button class="btn-danger" @onclick="(e) => DeleteTodo(e, item.Id)" disabled="@Waiting">Delete</button>
+					<td>
+							<button class="@DeleteKlass"
+							@onclick="(e) => DeleteTodo(e, item.Id)" 
+							@onmousedown="(e) => OnMouseDown(e, item.Id)" 
+							@onmouseup="(e) => OnMouseUp(e, item.Id)"
+									disabled="@Dimmad">
+								Delete
+							</button>
 					</td>
 					</ErrorBoundary>
 
@@ -46,34 +49,43 @@ else
 }
 
 
-<input type="button" value="Skapa nya ToDo's'" @onclick="AddTodo" disabled="@Waiting" />
-
+<input class="@AdderaKlass" type="button" value="Skapa nya ToDo's'" @onclick="AddTodo" disabled="@Waiting" />
+@*
 <h1>Id är @Id</h1>
+*@
 
 @code {
 	[Parameter]
 	public int Id { get; set; }
-	public bool Waiting { get; set; } = true;
-
-	@*public Todo Intake { get; set; } = new();*@
-	public List<Todo> Todos { get; set; } = new();
-
+	public bool Waiting = true;// { get; set; } = true;
+	public int Deleting = 0;
+	public bool Dimmad = false;
+	public string DeleteKlass = "btn-danger";
+	public string AdderaKlass = "btn-secondary";
+	public List<Todo> Todos = new(); // { get; set; } = new();
 
 	protected override async Task OnInitializedAsync()
 	{
-		await Task.Delay(2000);
+		Console.WriteLine("OnInitializedAsync ");
+
+		//await Task.Delay(2000);
 		Todos = await todoService.GetTodosAsync();
+		
 		Waiting = false;
+		AdderaKlass = "btn-primary";
 	}
 
 	protected override async Task OnParametersSetAsync()
 	{
+		Console.WriteLine("OnParametersSetAsync ");
 
 	}
-	// protected override async Task OnAfterRenderAsync()
-	// {
 
-	// }
+	protected override async Task OnAfterRenderAsync(bool first)
+	{
+		Console.WriteLine("OnAfterRenderAsync first="+first);
+
+	}
 
 
 
@@ -82,18 +94,53 @@ else
 		Navigation.NavigateTo("todoForm");
 
 	}
+
+	private DateTime holdStart;
+
+	public async Task OnMouseDown(MouseEventArgs m, int id)
+	{
+		Deleting = id;
+		holdStart = DateTime.Now;
+		Console.WriteLine("\n\nId:" + id + " Down:  " + Deleting + "   " + m.Type + "\n\n");
+
+	}
+	public async Task OnMouseUp(MouseEventArgs m, int id)
+	{
+		var duration = DateTime.Now - holdStart;
+		Console.WriteLine("\n\nId:" + id + " Up:  " + Deleting + "   " + m.Type +"   "+duration+ "\n\n");
+		if (duration.TotalSeconds >= 5)
+		{
+			Console.WriteLine("Held for 200 milliseconds or more");
+		}
+		else
+		{
+			Console.WriteLine("Short press");
+		}
+
+	}
 	public async Task DeleteTodo(MouseEventArgs m, int id)
 	{
-		Console.WriteLine("\n\nId:"+Id+"   id:"+id+ "   "+m.Type+"\n\n");
-		
-		Waiting = true;
+		Console.WriteLine("\n\nId:" + id + "   " + Deleting + "   " + m.Type + "\n\n");
+		if (Dimmad) return;
+
+		Dimmad = true;
+		DeleteKlass = "btn-secondary";
+
+		if (Deleting != id)
+		{
+			Console.WriteLine("Fel ID");
+			return;
+		}
 		StateHasChanged();
+		await Task.Delay(200);
 
 		await todoService.DeleteTodoAsync(id);
 		Todos = await todoService.GetTodosAsync();
 
 
-		Waiting = false;
+		Dimmad = false;
+		DeleteKlass = "btn-danger";
+
 		StateHasChanged();
 	}
 }

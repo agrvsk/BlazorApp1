@@ -1,15 +1,18 @@
 ﻿@page "/todoForm"
 @using System.ComponentModel.DataAnnotations
+@using BlazorApp1.Server.Data
 @using BlazorApp1.Server.Entities
 @using BlazorApp1.Server.Services
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Identity
 
 @rendermode InteractiveServer
 
-@*@inject IGlobalStateVars GlobalVars*@
 @inject NavigationManager Navigation
 @inject ITodoService todoService
 
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 
 <h3>TodoForm</h3>
@@ -18,7 +21,7 @@
     Hello @context.User.Identity?.Name!
 </AuthorizeView>
 
-<EditForm class=".form-horizontal" Model=@Editing OnSubmit=@FormSubmitted FormName="Register">
+<EditForm class="form-horizontal" Model=@Editing OnSubmit=@FormSubmitted FormName="Register">
     <DataAnnotationsValidator/>
     @*
     <div>
@@ -27,18 +30,22 @@
     </div>
     *@
     <div>
-        <label class=".control-label" for="title">Title:</label>
-        <InputText class=".form-control" @bind-Value="Editing.Title" id="title" />
+@*
+        <label class="control-label" for="title">Title:</label>
+*@
+        <InputText class="form-control" @bind-Value="Editing.Title" id="title" placeholder="Title" />
         <ValidationMessage For="@(() => Editing.Title)" />
     </div>
     <div>
-        <label class=".control-label" for="descr">Description:</label>
-        <InputText class=".form-control" @bind-Value ="Editing.Description" id="descr"></InputText>
+        @*
+        <label class="control-label" for="descr">Description:</label>
+        *@
+        <InputText class="form-control" @bind-Value="Editing.Description" id="descr" placeholder="Description"></InputText>
         <ValidationMessage For="@(() => Editing.Description)" />
     </div>
 
-    <button type="submit" disabled="@isProcessing">Skicka</button>
-    <input type="button" value="GoBack" @onclick="GoBack" />
+    <button class="@ButtonKlass" type="submit" disabled="@isProcessing">Skicka</button>
+    <input class="@ButtonKlass" type="button" disabled="@isProcessing" value="GoBack" @onclick="GoBack" />
 
     <ValidationSummary></ValidationSummary>
 
@@ -50,6 +57,9 @@
 
 @code {
     private bool isProcessing = false;
+    private IdentityUser currentUser;
+    private string currentUserName="N/A";
+    private string ButtonKlass = "btn-primary mt-3";
 
     private async Task FormSubmitted(EditContext editContext)
     {
@@ -59,13 +69,17 @@
         if(formIsValidated)
         {
             isProcessing = true;
+            ButtonKlass = "btn-secondary mt-3";
+
             StateHasChanged();
+            await Task.Delay(200);
 
             var currentEdit = (Todo)editContext.Model;
             //var cpyTodo = (Todo) currentEdit.Clone();
             // Post to api
             //GlobalVars.MyToDolist.Add(cpyTodo);
             currentEdit.Id = 0;
+            currentEdit.AssignedTo = currentUserName;
             await todoService.SaveTodoAsync(currentEdit);
             //StateHasChanged();
             //todoService.GetById();
@@ -74,11 +88,26 @@
             //currentEdit.Description = "";
         }
         isProcessing = false;
+        ButtonKlass = "btn-primary mt-3";
 
     }
 
+
+
     protected override async Task OnInitializedAsync()
     {
+        
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            currentUser = await UserManager.GetUserAsync(user);
+            currentUserName = currentUser.UserName;
+            Console.WriteLine($"Logged in as: {currentUser.UserName}");
+        }
+        
+
         @*
         Editing.Id = GlobalVars.MyToDolist.Any() 
         ? GlobalVars.MyToDolist.Max(o => o.Id) + 1

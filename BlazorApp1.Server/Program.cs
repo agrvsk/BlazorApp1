@@ -57,6 +57,12 @@ public class Program
             .AddSignInManager()
             .AddDefaultTokenProviders();
 
+        //builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+        //{
+        //    options.SignIn.RequireConfirmedAccount = true;
+        //})
+        //.AddEntityFrameworkStores<ApplicationDbContext>();
+
         builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
         builder.Services.AddScoped<IWaterService, WaterService>();
         builder.Services.AddScoped<ITodoService, TodoService>();
