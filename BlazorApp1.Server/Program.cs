@@ -59,6 +59,7 @@ public class Program
 
         builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
         builder.Services.AddScoped<IWaterService, WaterService>();
+        builder.Services.AddScoped<ITodoService, TodoService>();
 
         var app = builder.Build();
 

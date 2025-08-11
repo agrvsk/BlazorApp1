@@ -1,0 +1,97 @@
+﻿@page "/todoForm"
+@using System.ComponentModel.DataAnnotations
+@using BlazorApp1.Server.Entities
+@using BlazorApp1.Server.Services
+@using Microsoft.AspNetCore.Components.Forms
+
+@rendermode InteractiveServer
+
+@*@inject IGlobalStateVars GlobalVars*@
+@inject NavigationManager Navigation
+@inject ITodoService todoService
+
+
+
+<h3>TodoForm</h3>
+
+<AuthorizeView>
+    Hello @context.User.Identity?.Name!
+</AuthorizeView>
+
+<EditForm class=".form-horizontal" Model=@Editing OnSubmit=@FormSubmitted FormName="Register">
+    <DataAnnotationsValidator/>
+    @*
+    <div>
+        <label for="id">Id:</label>
+        <InputNumber @bind-Value="Editing.Id" id="id" ></InputNumber>
+    </div>
+    *@
+    <div>
+        <label class=".control-label" for="title">Title:</label>
+        <InputText class=".form-control" @bind-Value="Editing.Title" id="title" />
+        <ValidationMessage For="@(() => Editing.Title)" />
+    </div>
+    <div>
+        <label class=".control-label" for="descr">Description:</label>
+        <InputText class=".form-control" @bind-Value ="Editing.Description" id="descr"></InputText>
+        <ValidationMessage For="@(() => Editing.Description)" />
+    </div>
+
+    <button type="submit" disabled="@isProcessing">Skicka</button>
+    <input type="button" value="GoBack" @onclick="GoBack" />
+
+    <ValidationSummary></ValidationSummary>
+
+</EditForm>
+
+
+
+
+
+@code {
+    private bool isProcessing = false;
+
+    private async Task FormSubmitted(EditContext editContext)
+    {
+        if (isProcessing) return;
+
+        bool formIsValidated = editContext.Validate();
+        if(formIsValidated)
+        {
+            isProcessing = true;
+            StateHasChanged();
+
+            var currentEdit = (Todo)editContext.Model;
+            //var cpyTodo = (Todo) currentEdit.Clone();
+            // Post to api
+            //GlobalVars.MyToDolist.Add(cpyTodo);
+            currentEdit.Id = 0;
+            await todoService.SaveTodoAsync(currentEdit);
+            //StateHasChanged();
+            //todoService.GetById();
+            //currentEdit.Id++;
+            //currentEdit.Title = "";
+            //currentEdit.Description = "";
+        }
+        isProcessing = false;
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        @*
+        Editing.Id = GlobalVars.MyToDolist.Any() 
+        ? GlobalVars.MyToDolist.Max(o => o.Id) + 1
+        : 1;
+        *@
+    }
+    public void GoBack()
+    {
+        Navigation.NavigateTo("todoList");
+        StateHasChanged();
+    }
+
+
+    public Todo Editing = new();
+
+}

@@ -1,0 +1,99 @@
+﻿@page "/todoList/{Id:int?}"
+@using System.ComponentModel.DataAnnotations
+@using BlazorApp1.Server.Entities
+@using BlazorApp1.Server.Services
+@rendermode InteractiveServer
+@* @inject IGlobalStateVars GlobalVars *@
+@inject NavigationManager Navigation
+@inject ITodoService todoService
+
+<h3>TodoList</h3>
+@if (Waiting)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Titel</th>
+				<th>Description</th>
+				<th>Assigned</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in Todos)
+			{
+				<tr>
+					<ErrorBoundary>
+@* 					<td>
+						<a class="btn-danger" @onclick="() => DeleteTodo(item.Id)" href="/todoList/@item.Id">Delete</a>
+					</td>
+ *@					<td>
+							<button class="btn-danger" @onclick="(e) => DeleteTodo(e, item.Id)" disabled="@Waiting">Delete</button>
+					</td>
+					</ErrorBoundary>
+
+					<td>@item.Title</td>
+					<td>@item.Description</td>
+					<td>@item.AssignedTo</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+
+<input type="button" value="Skapa nya ToDo's'" @onclick="AddTodo" disabled="@Waiting" />
+
+<h1>Id är @Id</h1>
+
+@code {
+	[Parameter]
+	public int Id { get; set; }
+	public bool Waiting { get; set; } = true;
+
+	@*public Todo Intake { get; set; } = new();*@
+	public List<Todo> Todos { get; set; } = new();
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		await Task.Delay(2000);
+		Todos = await todoService.GetTodosAsync();
+		Waiting = false;
+	}
+
+	protected override async Task OnParametersSetAsync()
+	{
+
+	}
+	// protected override async Task OnAfterRenderAsync()
+	// {
+
+	// }
+
+
+
+	public void AddTodo()
+	{
+		Navigation.NavigateTo("todoForm");
+
+	}
+	public async Task DeleteTodo(MouseEventArgs m, int id)
+	{
+		Console.WriteLine("\n\nId:"+Id+"   id:"+id+ "   "+m.Type+"\n\n");
+		
+		Waiting = true;
+		StateHasChanged();
+
+		await todoService.DeleteTodoAsync(id);
+		Todos = await todoService.GetTodosAsync();
+
+
+		Waiting = false;
+		StateHasChanged();
+	}
+}
