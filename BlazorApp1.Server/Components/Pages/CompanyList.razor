@@ -3,6 +3,7 @@
 @using BlazorApp1.Server.Services
 @using BlazorApp1.Server.Entities
 @inject ICompanyService companyService
+@rendermode InteractiveServer
 <h3>CompanyList</h3>
 
 @if(Loading)
@@ -13,6 +14,18 @@ else
 {
     if(Companies != null)
     {
+        <div class="container">
+            <div class="row row-cols-3">
+                <input class="@PrevClass" type="button" value="<" disabled="@PrevState" @onclick="Previous" />
+                <div class="d-flex align-items-center justify-content-center">
+                    <PageMeterComponent Value="@PagingData.CurrentPage" MaxValue="@PagingData.TotalPages" />
+                </div>
+ *@                <input class="@NextClass" type="button" value=">" disabled="@NextState" @onclick="Next" />
+
+            </div>
+        </div>
+
+
         foreach(var company in Companies)
         {
             <div class="card card-body m-3">
@@ -25,4 +38,5 @@ else
         <p>Antal sidor: @PagingData.TotalPages</p>
     }
 }
+
 

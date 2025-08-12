@@ -1,0 +1,47 @@
+﻿@rendermode InteractiveServer
+@* 
+<h3>PageMeterComponent</h3>
+ *@
+ @*
+<div style="width: 200px; background-color: lightgrey; height: 25px">
+    <div style="width: @(MeterWidth)px; background-color: black; height:25px">sidan @Value / @MaxValue</div>
+</div>
+<p>sidan @Value / @MaxValue</p>
+*@
+<div class="progress" style="width:100%">
+    <div class="progress-bar progress-bar-striped" 
+    role="progressbar" 
+    style="width:@Procent%" >
+        sida: @Value / @MaxValue
+    </div>
+</div>
+@code {
+    [Parameter]
+    public int Value { get; set; }
+
+    [Parameter]
+    public int MaxValue { get; set; }
+
+    //public int MeterWidth { get; set; } = 0;
+    public int Procent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("OnInitialize: " + Value + "   " + MaxValue);
+        Procent = (int)((Value / (double)MaxValue) * 100);
+        Console.WriteLine("Procent:"+Procent);
+        //MeterWidth = (int)((Value / (double)MaxValue) * 200);
+        StateHasChanged();
+
+    }
+    protected override void OnParametersSet()
+    {
+        Console.WriteLine("OnParametersSet: " + Value + "   " + MaxValue);
+        Procent = (int)((Value / (double)MaxValue) * 100);
+        Console.WriteLine("Procent:" + Procent);
+
+        //MeterWidth = (int)((Value / (double)MaxValue) * 200);
+        StateHasChanged();
+    }    
+
+}
